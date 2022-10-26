@@ -1,0 +1,277 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Guild Wars 2 - Gold per Hour</title>
+        <meta name="description" content="How much gold you made since you started the application">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="favicon.ico">
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/goldPerHour.css">
+        <link rel="stylesheet" href="css/spinner.css">
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,900' rel='stylesheet' type='text/css'>
+        <script src="js/vendor/fix-timer.min.js"></script>
+        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <h1>Guild Wars 2 - Oro por hora</h1>
+
+        <div class="language">
+            <a href="index-fr.html"><img src="img/fr.svg" alt="Français" title="Français" width="20px"></a>
+            <a href="index-de.html"><img src="img/de.svg" alt="Deutsch" title="Deutsch" width="20px"></a>
+        </div>
+        </br>
+
+        <div id="intro">
+            <h2>Bienvenidos a Guild Wars 2 - Oro por hora</h2>
+            <p>Esta aplicación rastrea todo lo que sucede con su cuenta y muestra cuánto oro ganaría si vendiera todos los artículos que compró y cuánto oro perdió de los artículos que se eliminaron de su cuenta (vendidos, destruidos, consumidos, etc.) .</p>
+            <p>Ten en cuenta que, en algunos casos, es posible que se necesiten 2 o 3 actualizaciones para que aparezcan los elementos adquiridos o perdidos. La API no devuelve datos en vivo cada vez que se llama, así que ten paciencia :)</p>
+            <hr>
+            <h2>Inserta tu API key aquí:</h2>
+            <input type="text" id="apiKey" maxwidth="100" value="">
+            <button id="continueIntro">Go!</button>
+            <br>
+            <label class="small" for="saveAPIKey"><input type="checkbox" id="saveAPIKey"> Guardar mi clave API localmente, para que no tenga que ingresarla la próxima vez</label>
+            
+            <p>¿No tienes clave API? Entra aquí <a href="https://www.guildwars2.com/" target="_blank">guildwars2.com</a> y entra a tu cuenta. Después en<strong>Aplicaciones</strong>Crea tu clave API. Marca todas las opciones <em>unlocks, wallet, tradingpost, account, inventories</em> and <em>characters</em> permissions.</p>
+            <div class="borderTop"></div>
+            <div class="borderRight"></div>
+            <div class="borderBottom"></div>
+            <div class="borderLeft"></div>
+        </div>
+        
+        <div id="menu" style="display:none;">
+            <span id="about"><img src="img/about.png" alt="about" title="About">About</span>
+            <span class="separator">|</span>
+            <span id="settings"><img src="img/settings.png" alt="settings" title="Settings">Settings</span>
+            <span class="separator">|</span>
+            <span id="countdown"></span>
+            <button id="stop">Stop</button>
+            <button id="resume">Resume</button>
+            <button id="startOver">Start over</button>
+        </div>
+        
+        <div id="main">
+            <h2>Summary <span class="toggle" id="toggleSummary">(toggle)</span></h2>
+            <div id="header">
+                <div id="headerLeft">
+                    <table id="summary">
+                        <tr>
+                            <td>Oro inicial (<span id="startTime"></span>):</td>
+                            <td id="initialGold"></td>
+                        </tr>
+                        <tr>
+                            <td class="bottomBorder">Oro actual (<span id="currentTime"></span>):</td>
+                            <td id="currentGold" class="price bottomBorder"></td>
+                        </tr>
+                        <tr>
+                            <td>Diferencia de oro: </td>
+                            <td id="overallGoldDifference" class="price"></td>
+                        </tr>
+                        <tr>
+                            <td>+ Ganancias de artículos adquiridos (sin impuestos): </td>
+                            <td id="overallGains" class="price"></td>
+                        </tr>
+                        <tr>
+                            <td>- Tarifas de listado y venta (15%): </td>
+                            <td id="overallFees" class="price"></td>
+                        </tr>
+                        <tr>
+                            <td class="bottomBorder">- Pérdidas por objetos perdidos (<em>including</em> fees): </td>
+                            <td id="overallLosses" class="price bottomBorder"></td>
+                        </tr>
+                        <tr>
+                            <td class="bottomBorder">Resultados: </td>
+                            <td id="overallResult" class="price bottomBorder"></td>
+                        </tr>
+                        <tr>
+                            <td>Promedio de oro por hora: </td>
+                            <td id="overallAverage" class="price"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="headerRight">
+                    <div id="chart"></div>
+                </div>
+            </div>
+            
+            <h2>Artículos adquiridos <span class="toggle" id="toggleNew">(toggle)</span></h2>
+            <div id="newItems">
+                <div id="gridNew"></div>
+                <div id="spinnerNew" class="spinner">
+                    <div class="bounce1"></div>
+                    <div class="bounce2"></div>
+                    <div class="bounce3"></div>
+                </div>
+                <p class="none">Ninguno hasta ahora ...</p>
+                <div class="results" id="totalNew" style="display: none;"></div>
+            </div>
+            
+            <h2>Artículos perdidos <span class="toggle" id="toggleOld">(toggle)</span></h2>
+            <div id="oldItems">
+                <div id="gridOld"></div>
+                <div id="spinnerOld" class="spinner">
+                    <div class="bounce1"></div>
+                    <div class="bounce2"></div>
+                    <div class="bounce3"></div>
+                </div>
+                <p class="none">Ninguna hasta ahora ...</p>
+                <div class="results" id="totalOld" style="display: none;"></div>
+            </div>
+
+            <h2>Otras monedas <span class="toggle" id="toggleCurrencies">(toggle)</span></h2>
+            <div id="otherCurrencies">
+                <div id="currencies"></div>
+                <div id="currenciesGraph"></div>
+            </div>
+
+            <div class="borderTop"></div>
+            <div class="borderRight"></div>
+            <div class="borderBottom"></div>
+            <div class="borderLeft"></div>
+        </div>
+
+        <div id="newVersion"></div>
+        <div id="warning"></div>
+
+        <footer>
+            Echo por Deviljeff.1946 - <a href="https://github.com/jfnaud/Guild-Wars-2-Gold-per-hour" target="_blank" title="Project on GitHub">Project on GitHub (v. <span id="currentVersion"></span>) traducido por Memphys Farmer al Español-<a href="https://www.youtube.com/channel/UC_okMVUlR8w6v08qraD6pJw" target="_blank" title="Project on GitHub"></a>
+            <br>
+            <span class="clearAPIKey">Reiniciar mi Clave API</span>
+            <!--<br><button id="saveCurrentState">Debug</button>-->
+        </footer>
+
+        <div id="popupOverlay"></div>
+
+        <div id="aboutPopup">
+            <h2>Sobre la app</h2>
+            <p>Esta aplicación rastrea todo lo que sucede con su cuenta y muestra cuánto oro obtendría si vendiera todos los artículos que adquirió, y cuánto oro perdió de los artículos que se eliminaron de su cuenta (vendidos, destruido, consumido, etc.).</p>
+            <p>Tenga en cuenta que, en algunos casos, es posible que se necesiten 2 o 3 actualizaciones para que aparezcan los elementos adquiridos o perdidos. La API no devuelve datos en vivo cada vez que se llama, así que tenga paciencia :)</p>
+            <hr>
+            <p>Mira las <strong>Opciones</strong> para personalizar la interfaz con tus preferencias. Estos ajustes se cambiarán cuando reinicies la aplicación<p>
+            <hr>
+        </div>
+
+        <div id="settingsPopup">
+            <h2>Opciones</h2>
+            <table>
+            <tr class="threeCols">
+                <td><label for="toggleDetails"><input type="checkbox" id="toggleDetails"> Mostrar detalles del objeto</label></td>
+                <td colspan="2"><label for="toggleSound"><input type="checkbox" id="toggleSound"> Reproducir un efecto de sonido al actualizar</label></td>
+            </tr>
+            <tr class="threeCols">
+                <td>
+                    <h3>Ordenar elementos por:</h3> 
+                    <label for="sortByRarity"><input type="radio" value="rarity" name="sortBy" id="sortByRarity"> Rareza</label><br>
+                    <label for="sortByValue"><input type="radio" value="value" name="sortBy" id="sortByValue"> Valor descendente</label>
+                </td>
+                <td>
+                    <h3>Para valores de artículos, utilice:</h3>
+                    <label for="lowestSeller"><input type="radio" value="lowestSeller" name="valueFrom" id="lowestSeller"> El vendedor más bajo (artículos de la lista)</label><br>
+                    <label for="highestBuyer"><input type="radio" value="highestBuyer" name="valueFrom" id="highestBuyer"> Mayor comprador (vender al instante)</label>
+                </td>
+                <td>
+                    <h3>Oro por hora basado en:</h3>
+                    <label for="sinceStart"><input type="radio" value="sinceStart" name="baseTime" id="sinceStart"> Tiempo transcurrido desde el inicio</label><br>
+                    <label for="elapsed"><input type="radio" value="elapsed" name="baseTime" id="elapsed"> Tiempo transcurrido durante la ejecución</label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <table id="typesList">
+                    <thead>
+                        <th><input type="checkbox" id="checkAllTypes" checked="checked"></th>
+                        <th colspan="7">Show items of these types:</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" data-type="Armor" id="ArmorItem" class="itemType"></td>
+                            <td><label for="ArmorItem">Armadura</label></td>
+                            <td><input type="checkbox" data-type="Back" id="BackItem" class="itemType"></td>
+                            <td><label for="BackItem">Artículo posterior</label></td>
+                            <td><input type="checkbox" data-type="Bag" id="BagItem" class="itemType"></td>
+                            <td><label for="BagItem">Bolsas</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" data-type="Consumable" id="ConsumableItem" class="itemType"></td>
+                            <td><label for="ConsumableItem">Consumibles</label></td>
+                            <td><input type="checkbox" data-type="Container" id="ContainerItem" class="itemType"></td>
+                            <td><label for="ContainerItem">Contenedores</label></td>
+                            <td><input type="checkbox" data-type="CraftingMaterial" id="CraftingMaterialItem" class="itemType"></td>
+                            <td><label for="CraftingMaterialItem">Materiales de Crafteo</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" data-type="Gathering" id="GatheringItem" class="itemType"></td>
+                            <td><label for="GatheringItem">Herramientas de farmeo</label></td>
+                            <td><input type="checkbox" data-type="Gizmo" id="GizmoItem" class="itemType"></td>
+                            <td><label for="GizmoItem">Artilugios</label></td>
+                            <td><input type="checkbox" data-type="MiniPet" id="MiniPetItem" class="itemType"></td>
+                            <td><label for="MiniPetItem">Mascotas</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" data-type="Tool" id="ToolItem" class="itemType"></td>
+                            <td><label for="ToolItem">Equipos de salvamento</label></td>
+                            <td><input type="checkbox" data-type="Trait" id="TraitItem" class="itemType"></td>
+                            <td><label for="TraitItem">Guías de características</label></td>
+                            <td><input type="checkbox" data-type="Trinket" id="TrinketItem" class="itemType"></td>
+                            <td><label for="TrinketItem">Trinkets</label></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" data-type="Trophy" id="TrophyItem" class="itemType"></td>
+                            <td><label for="TrophyItem">Trofeos</label></td>
+                            <td><input type="checkbox" data-type="UpgradeComponent" id="UpgradeComponentItem" class="itemType"></td>
+                            <td><label for="UpgradeComponentItem">Actualizar componentes</label></td>
+                            <td><input type="checkbox" data-type="Weapon" id="WeaponItem" class="itemType"></td>
+                            <td><label for="WeaponItem">Armas</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <label for="ignoreHidden"><input type="checkbox" id="ignoreHidden"> Ignorar el valor de objetos ocultos</label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <h3>Tipo de escaneo del equipo:</h3> 
+                    <label for="currentlyEquipped"><input type="radio" value="currentlyEquipped" name="equipmentScanType" id="currentlyEquipped"> Solo artículos actualmente equipados (predeterminado)</label><br>
+                    <label for="allTabs"><input type="radio" value="allTabs" name="equipmentScanType" id="allTabs"> Todas las plantillas de equipos</label>
+                </td>
+            </tr>
+            </table>
+            
+            <hr>
+            <div id="settingsButtons">
+                <button id="restoreDefaults">Restaurar la configuración predeterminada</button>
+                <button class="clearAPIKey">Restablecer mi clave API guardada</button>
+            </div>
+        </div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.3.min.js"><\/script>')</script>
+        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+        <script src="js/vendor/highstock.js"></script>
+        <script src="js/console.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- Google analytics -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-68722111-1', 'auto');
+          ga('send', 'pageview');
+
+        </script>
+    </body>
+</html>
